@@ -1,5 +1,4 @@
 import React, { useRef, useEffect } from "react"
-import { checkViolation } from "../support"
 
 const Radar = ({ show, drones }) => {
   const ref = useRef()
@@ -34,9 +33,9 @@ const Radar = ({ show, drones }) => {
       context.fill()
 
       drones.forEach((drone) => {
-        const x = drone.x / 1000        
+        const x = drone.x / 1000
         const y = drone.y / 1000
-        context.fillStyle = checkViolation(drone.x, drone.y) ? "red" : 'black'
+        context.fillStyle = drone.violation ? "red" : "black"
         context.beginPath()
         context.arc(x, y, 5, 0, 2 * Math.PI)
         context.fill()
@@ -49,7 +48,11 @@ const Radar = ({ show, drones }) => {
 
   if (!show) return null
 
-  return <canvas ref={ref} width={500} height={500} />
+  return (
+    <div>
+      <canvas ref={ref} width={500} height={500} />
+    </div>
+  )
 }
 
 export default Radar

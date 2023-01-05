@@ -1,15 +1,13 @@
 import axios from "axios"
 
-const baseUrl = "/api/data"
-
-const getAll = async () => {
-  const response = await axios.get(baseUrl)
+const getDrones = async () => {
+  const response = await axios.get("api/drones")
   return response.data
 }
 
-const getPilot = async (id) => {
-    const response = await axios.get(`${baseUrl}/${id}`)
-    return response.data
+const getViolations = async () => {
+  const response = await axios.get(`api/violations`)
+  return response.data
 }
 
-export default { getAll, getPilot }
+export default { getDrones, getViolations }

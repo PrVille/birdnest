@@ -1,49 +1,73 @@
-import { useState, useEffect } from "react"
-import dataService from "../services/data.js"
+import { useState } from "react"
+import Select from "react-dropdown-select"
 import Violation from "./Violation.js"
-import { checkViolation, parsePilot } from "../support.js"
+import Table from "react-bootstrap/Table"
 
-const Violations = ({ drones, show }) => {
-  const [violations, setViolations] = useState([])
+const Violations = ({ violations, show }) => {
+  const [sort, setSort] = useState("startTime")
 
-  useEffect(() => {
-    drones.forEach(async (drone) => {
-      if (checkViolation(drone.x, drone.y)) {
-        const pilot = await dataService.getPilot(drone.serialNumber)
-        const violation = parsePilot(pilot)
-        const newViolations = nonExpired
-          .filter((pilot) => pilot.pilotId !== violation.pilotId)
-          .concat(violation)
-        setViolations(
-          newViolations.filter((pilot) => Date.now() - pilot.startTime < 60000)
-        )
-      }
-    })
-  }, [drones])
+  if (!show) return null
 
-  const nonExpired = violations.filter(
-    (violation) => Date.now() - violation.startTime < 60000
-  )
+  const compare = (key) => {
+    let order = 1
+    if (key[0] === "-") {
+      order = -1
+      key = key.substr(1)
+    }
 
-  if (!show || violations.length === 0) return null
+    return (a, b) => {
+      const result = a[key] < b[key] ? -1 : a[key] > b[key] ? 1 : 0
+      return result * order
+    }
+  }
+
+  const getOrderValue = (value) => {
+    return sort === value ? "-" + value : value
+  }
+
+  const options = [
+    {
+      value: getOrderValue("startTime"),
+      label: "Violation time",
+    },
+    {
+      value: getOrderValue("firstName"),
+      label: "First name",
+    },
+    {
+      value: getOrderValue("lastName"),
+      label: "Last name",
+    },
+    {
+      value: getOrderValue("distanceToNest"),
+      label: "Distance",
+    },
+  ]
 
   return (
     <div>
-      <table>
+      <Select
+        options={options}
+        placeholder={"Sort by..."}
+        onChange={(selected) => setSort(selected[0].value)}
+      />
+      <br />
+      <Table striped bordered>
         <thead>
           <tr>
             <th>Pilot name</th>
             <th>Pilot email</th>
-            <th>Pilot phonenumber</th>
-            <th>Elapsed time since violation</th>
+            <th>Pilot phone number</th>
+            <th>Violation timestamp</th>
+            <th>Closest confirmed distance (m)</th>
           </tr>
         </thead>
         <tbody>
-          {nonExpired.map((violation, index) => {
+          {violations.sort(compare(sort)).map((violation, index) => {
             return <Violation key={index} violation={violation} />
           })}
         </tbody>
-      </table>
+      </Table>
     </div>
   )
 }

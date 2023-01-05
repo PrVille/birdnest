@@ -6,7 +6,8 @@ const Violation = ({ violation }) => {
       </td>
       <td>{violation.email}</td>
       <td>{violation.phoneNumber}</td>
-      <td>{Math.floor((Date.now() - violation.startTime) / 1000)}</td>
+      <td>{new Date(violation.startTime).toUTCString()}</td>
+      <td>{(violation.distanceToNest / 1000).toFixed(1)}</td>
     </tr>
   )
 }

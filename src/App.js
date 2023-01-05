@@ -1,47 +1,56 @@
 import { useState, useEffect } from "react"
 import dataService from "./services/data.js"
+import Loading from "./components/Loading.js"
 import Violations from "./components/Violations.js"
-import Radar from './components/Radar.js'
-import Stats from './components/Stats.js'
-import { parseDrone } from "./support.js"
-const { convertXML } = require("simple-xml-to-json")
-
-
-
+import Radar from "./components/Radar.js"
+import Button from "react-bootstrap/Button"
+import ButtonGroup from "react-bootstrap/ButtonGroup"
+import Stack from "react-bootstrap/Stack"
 
 const App = () => {
   const [drones, setDrones] = useState([])
-  const [page, setPage] = useState('violations')
+  const [violations, setViolations] = useState([])
+  const [page, setPage] = useState("violations")
 
   useEffect(() => {
     let interval = setInterval(async () => {
-      const res = await dataService.getAll()
-      const myJson = convertXML(res)
-      const timesStamp = myJson.report.children[1].capture.snapshotTimestamp
-      const droneObjs = []
-      myJson.report.children[1].capture.children.forEach((drone) => {
-        droneObjs.push(parseDrone(drone, timesStamp))
-      })
-      setDrones(droneObjs)
+      const drones = await dataService.getDrones()
+      const violations = await dataService.getViolations()
+      setViolations(violations)
+      setDrones(drones)
     }, 2000)
     return () => {
       clearInterval(interval)
     }
   }, [drones])
 
-  if (!drones) return null
+  if (drones.length === 0) return <Loading type={"spokes"} color={"black"} />
 
   return (
-    <div>
-      <div>
-        <button onClick={() => setPage('violations')}>violations</button>
-        <button onClick={() => setPage('radar')}>radar</button>
-        <button onClick={() => setPage('stats')}>stats</button>
-        <button onClick={() => setPage('all')}>all</button>
-      </div>
-      <Stats show={page === 'stats' || page === "all"} drones={drones} />
-      <Radar show={page === 'radar' || page === "all"} drones={drones} />
-      <Violations show={page === 'violations' || page === "all"} drones={drones} />
+    <div className="container">
+      <Stack gap={3} className="text-center">
+        <div>
+          <ButtonGroup>
+            <Button
+              variant="outline-dark"
+              onClick={() => setPage("violations")}
+            >
+              Violations
+            </Button>
+            <Button variant="outline-dark" onClick={() => setPage("radar")}>
+              Radar
+            </Button>
+            <Button variant="outline-dark" onClick={() => setPage("all")}>
+              All
+            </Button>
+          </ButtonGroup>
+        </div>
+        <Radar show={page === "radar" || page === "all"} drones={drones} />
+        <Violations
+          show={page === "violations" || page === "all"}
+          violations={violations}
+        />
+      </Stack>
     </div>
   )
 }
