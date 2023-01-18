@@ -1,0 +1,12 @@
+GET http://localhost:3003/api/data
+###
+POST http://localhost:3003/api/data
+Content-Type: application/json
+
+{
+    "pilotId": "wefsd7fsdj",
+    "firstName": "test",
+    "lastName": "test",
+    "email": "a@s",
+    "phoneNumber": "050"
+}
